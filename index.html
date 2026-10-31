@@ -1,0 +1,272 @@
+<!doctype html>
+<html lang="en-AU" data-app="keystroke">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Keystroke — typing speed test</title>
+<meta name="description" content="A typing speed test with live WPM, a second-by-second chart, a keyboard heatmap of your weakest keys and drills to fix them.">
+<meta property="og:title" content="Keystroke">
+<meta property="og:description" content="A typing speed test with live WPM, a second-by-second chart, a keyboard heatmap of your weakest keys and drills to fix them.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://lz-keystroke.pages.dev/">
+<meta property="og:image" content="https://lz-keystroke.pages.dev/og.png">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700;800&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="zl.css">
+<link rel="stylesheet" href="styles.css">
+<script src="zl.js"></script>
+<script src="words.js" defer></script>
+<script src="engine.js" defer></script>
+<script src="charts.js" defer></script>
+<script src="app.js" defer></script>
+</head>
+<body id="top">
+<div data-zl="nav"></div>
+
+<main>
+  <section class="zl-hero zl-wrap">
+    <div data-zl="icon"></div>
+    <h1>Keystroke</h1>
+    <p class="zl-tagline">Type faster. See exactly why.</p>
+    <p class="zl-sub">A typing test with live speed, a second-by-second chart and a heatmap of the keys that trip you up. Then drill those keys until they don't.</p>
+    <div class="zl-hero-ctas">
+      <a class="zl-btn zl-btn-primary zl-btn-lg" href="#app">Start typing</a>
+      <a class="zl-btn zl-btn-secondary zl-btn-lg" href="#how">See how it works</a>
+    </div>
+    <div class="zl-hero-meta">
+      <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>Free, no sign-up</span>
+      <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>Results saved on your device</span>
+      <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>Works with phone keyboards</span>
+    </div>
+    <div class="ks-hero-demo" aria-hidden="true">
+      <div class="ks-hero-demo-bar"><span id="ks-demo-wpm">0</span> wpm<i></i><span id="ks-demo-acc">100%</span></div>
+      <div class="ks-hero-demo-text" id="ks-demo-text"></div>
+    </div>
+  </section>
+
+  <section class="zl-stage" id="app" data-nav="Test">
+    <div class="zl-wrap">
+      <div class="zl-app ks-app" id="ks-app">
+        <div class="zl-appbar">
+          <div class="zl-appbar-title"><span class="zl-dot" id="ks-dot"></span><span>Typing test</span> <span class="zl-appbar-status" id="ks-status" aria-live="polite">Ready</span></div>
+          <div class="zl-seg ks-tabs" role="tablist" aria-label="View">
+            <button type="button" role="tab" id="ks-tab-test" aria-selected="true" aria-controls="ks-view-test">Test</button>
+            <button type="button" role="tab" id="ks-tab-progress" aria-selected="false" aria-controls="ks-view-progress">Progress <span class="ks-tab-count num" id="ks-tab-count" hidden>0</span></button>
+          </div>
+          <button type="button" class="zl-btn zl-btn-secondary zl-btn-sm" id="ks-example" data-tip="Fills in sample results and history">Load example</button>
+        </div>
+
+        <!-- TEST VIEW -->
+        <div id="ks-view-test" role="tabpanel" aria-labelledby="ks-tab-test">
+          <div class="ks-config" id="ks-config">
+            <div class="ks-group">
+              <span class="zl-label" id="lbl-mode">Mode</span>
+              <div class="zl-seg" role="group" aria-labelledby="lbl-mode" id="ks-mode">
+                <button type="button" data-mode="time" aria-pressed="true">Time</button>
+                <button type="button" data-mode="words" aria-pressed="false">Words</button>
+                <button type="button" data-mode="sentences" aria-pressed="false">Sentences</button>
+              </div>
+            </div>
+            <div class="ks-group">
+              <span class="zl-label" id="lbl-length">Seconds</span>
+              <div class="zl-seg" role="group" aria-labelledby="lbl-length" id="ks-length"></div>
+            </div>
+            <div class="ks-group">
+              <span class="zl-label" id="lbl-opts">Add</span>
+              <div class="ks-chips" role="group" aria-labelledby="lbl-opts">
+                <button type="button" class="zl-chip" id="ks-punct" aria-pressed="false">Punctuation</button>
+                <button type="button" class="zl-chip" id="ks-nums" aria-pressed="false">Numbers</button>
+              </div>
+            </div>
+            <div class="ks-group">
+              <span class="zl-label" id="lbl-diff">Words from</span>
+              <div class="zl-seg" role="group" aria-labelledby="lbl-diff" id="ks-diff">
+                <button type="button" data-diff="common" aria-pressed="true" data-tip="The 200 most common words">Common</button>
+                <button type="button" data-diff="all" aria-pressed="false" data-tip="All 440+ words, more letters">All words</button>
+              </div>
+            </div>
+            <p class="zl-hint ks-config-hint" id="ks-config-hint" hidden>Sentences come with their own punctuation, so these options are off.</p>
+          </div>
+
+          <div class="ks-body">
+            <div class="ks-typing" id="ks-typing">
+              <div class="ks-live" id="ks-live">
+                <span class="ks-live-main num" id="ks-live-main">30</span>
+                <span class="ks-live-stat"><b class="num" id="ks-live-wpm">0</b> wpm</span>
+                <span class="ks-live-stat"><b class="num" id="ks-live-acc">100%</b> accuracy</span>
+                <span class="zl-badge ks-drill-tag" id="ks-drill-tag" hidden>Weak-key drill</span>
+              </div>
+              <div class="ks-words-wrap" id="ks-words-wrap">
+                <div class="ks-words" id="ks-words" aria-hidden="true"></div>
+                <div class="ks-caret" id="ks-caret" aria-hidden="true"></div>
+                <label class="sr-only" for="ks-input">Type the words shown</label>
+                <input id="ks-input" class="ks-input" type="text" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" enterkeyhint="next" aria-describedby="ks-sr-words">
+                <p class="sr-only" id="ks-sr-words"></p>
+                <div class="ks-blur" id="ks-blur" aria-hidden="true"><span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 3.5l8 9-4.5.5 2.6 5.4-2.2 1-2.6-5.5L7 17z"/></svg>Click here or press any key to focus</span></div>
+              </div>
+              <div class="ks-typing-foot">
+                <button type="button" class="zl-btn zl-btn-secondary zl-btn-sm" id="ks-restart"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12a8 8 0 1 0 2.4-5.7L4 8.5"/><path d="M4 4v4.5h4.5"/></svg>Restart</button>
+                <button type="button" class="zl-btn zl-btn-ghost zl-btn-sm" id="ks-last" hidden>Last result</button>
+                <span class="zl-hint ks-keyhint"><kbd>Tab</kbd> then <kbd>Enter</kbd> restarts at any time</span>
+              </div>
+            </div>
+
+            <div class="ks-results" id="ks-results" hidden>
+              <h2 class="sr-only" id="ks-results-title">Results</h2>
+              <div class="ks-res-top">
+                <div class="ks-res-hero" aria-live="polite" id="ks-res-hero">
+                  <div class="ks-pb" id="ks-pb" hidden><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.8l2.7 5.6 6.1.8-4.5 4.3 1.1 6.1L12 16.7l-5.4 2.9 1.1-6.1-4.5-4.3 6.1-.8z"/></svg>New personal best</div>
+                  <div class="ks-big"><b class="num" id="ks-r-wpm">0</b><span>wpm</span></div>
+                  <div class="ks-acc"><b class="num" id="ks-r-acc">0%</b><span>accuracy</span></div>
+                  <p class="ks-res-meta" id="ks-r-meta"></p>
+                </div>
+                <div class="ks-chart-card" id="ks-chart">
+                  <div class="ks-card-head">
+                    <h3>Speed over the test</h3>
+                    <div class="ks-legend"><span class="k-wpm">WPM</span><span class="k-raw">Raw</span><span class="k-err">Errors</span></div>
+                  </div>
+                  <div class="ks-chart-box" id="ks-chart-box"></div>
+                </div>
+              </div>
+              <dl class="ks-res-stats" id="ks-res-stats">
+                <div><dt>Raw</dt><dd class="num" id="ks-r-raw">0</dd><span class="zl-hint">Every key, right or wrong</span></div>
+                <div><dt>Consistency</dt><dd class="num" id="ks-r-cons">0%</dd><span class="zl-hint">How steady your pace was</span></div>
+                <div><dt>Characters</dt><dd class="num ks-chars" id="ks-r-chars">0</dd><span class="zl-hint">Correct, incorrect, extra, missed</span></div>
+                <div><dt>Time</dt><dd class="num" id="ks-r-time">0s</dd><span class="zl-hint" id="ks-r-time-hint">From your first key</span></div>
+              </dl>
+              <div class="ks-res-keys">
+                <div class="ks-heatmap" id="ks-heatmap">
+                  <div class="ks-card-head">
+                    <h3>Key accuracy</h3>
+                    <div class="ks-scale" aria-hidden="true"><span>100%</span><i></i><span>80% or less</span></div>
+                  </div>
+                  <div id="ks-keyboard"></div>
+                </div>
+                <div class="ks-weak" id="ks-weak">
+                  <h3>Weakest keys</h3>
+                  <ol class="ks-weak-list" id="ks-weak-list"></ol>
+                  <button type="button" class="zl-btn zl-btn-primary" id="ks-drill">Practise weak keys</button>
+                  <p class="zl-hint" id="ks-drill-hint">A 25-word drill built from words heavy in these letters.</p>
+                </div>
+              </div>
+              <div class="ks-res-actions">
+                <button type="button" class="zl-btn zl-btn-primary zl-btn-lg" id="ks-next">Next test</button>
+                <button type="button" class="zl-btn zl-btn-secondary zl-btn-lg" id="ks-repeat">Repeat this text</button>
+                <button type="button" class="zl-btn zl-btn-ghost zl-btn-lg" id="ks-copy">Copy result</button>
+                <span class="zl-hint ks-keyhint"><kbd>Tab</kbd> then <kbd>Enter</kbd> for the next test</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- PROGRESS VIEW -->
+        <div id="ks-view-progress" role="tabpanel" aria-labelledby="ks-tab-progress" hidden>
+          <div class="ks-progress" id="ks-progress">
+            <div class="ks-avgs" id="ks-avgs"></div>
+            <div class="ks-prog-chart" id="ks-prog-chart">
+              <div class="ks-card-head"><h3>WPM over time</h3><div class="ks-legend"><span class="k-wpm">Each test</span><span class="k-avg">Average of last 10</span><span class="k-pb">Personal best</span></div></div>
+              <div class="ks-chart-box" id="ks-prog-box"></div>
+            </div>
+            <div class="ks-pbs-wrap">
+              <div class="ks-card-head"><h3>Personal bests</h3><span class="zl-hint">Your fastest result for each test length</span></div>
+              <div class="ks-pbs" id="ks-pbs"></div>
+            </div>
+            <div class="ks-history" id="ks-history">
+              <div class="ks-card-head"><h3>History</h3><button type="button" class="zl-btn zl-btn-danger zl-btn-sm" id="ks-clear">Clear history</button></div>
+              <div class="ks-table-wrap"><table class="ks-table" id="ks-table"><thead><tr><th scope="col">When</th><th scope="col">Test</th><th scope="col" class="r">WPM</th><th scope="col" class="r">Accuracy</th><th scope="col" class="r hide-sm">Raw</th><th scope="col" class="r hide-sm">Consistency</th></tr></thead><tbody></tbody></table></div>
+              <button type="button" class="zl-btn zl-btn-ghost zl-btn-sm ks-more" id="ks-more" hidden>Show all</button>
+            </div>
+          </div>
+          <div class="zl-empty ks-prog-empty" id="ks-prog-empty" hidden>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19V5M4 19h16"/><path d="M7.5 15l3.5-4 3 2.5 5-6"/></svg>
+            <h3>No tests yet</h3>
+            <p>Finish a test and your speed, personal bests and history will build up here.</p>
+            <div class="ks-empty-ctas"><button type="button" class="zl-btn zl-btn-primary" id="ks-empty-start">Take a test</button><button type="button" class="zl-btn zl-btn-secondary" id="ks-empty-example">Load example</button></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="zl-section alt" id="how" data-nav="How it works">
+    <div class="zl-wrap">
+      <div class="zl-section-head zl-reveal"><h2>Type. Review. Drill.</h2><p>A short loop that shows where the time goes and gives you something to do about it.</p></div>
+      <div class="zl-steps zl-reveal">
+        <div class="zl-step"><h3>Pick a test and type</h3><p>Choose time, word count or real sentences. The clock starts on your first key, and your speed updates as you go.</p></div>
+        <div class="zl-step"><h3>Read the results</h3><p>See speed second by second, where the errors happened, and how accurate each key on the keyboard was.</p></div>
+        <div class="zl-step"><h3>Drill your weak keys</h3><p>One tap builds a short test from words packed with the letters you missed most. Then watch your history climb.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="zl-section" id="features" data-nav="Features">
+    <div class="zl-wrap">
+      <div class="zl-section-head zl-reveal"><h2>More than one number.</h2><p>Words per minute tells you how fast. Everything else tells you how to get faster.</p></div>
+      <div class="zl-bento zl-reveal">
+        <div class="zl-tile wide">
+          <h3>Every second, charted.</h3>
+          <p>Your speed and raw speed for each second, with a mark wherever an error happened. Hover to see the detail.</p>
+          <div class="zl-tile-visual ks-mini-chart">
+            <svg viewBox="0 0 520 120" preserveAspectRatio="none" aria-hidden="true">
+              <path d="M0 30H520M0 60H520M0 90H520" stroke="var(--line)" stroke-width="1"/>
+              <path d="M0 98 C40 70 70 40 110 44 S170 36 210 40 S270 58 300 50 S360 30 400 34 S470 38 520 30" fill="none" stroke="var(--faint)" stroke-width="2" stroke-dasharray="4 5" stroke-linecap="round"/>
+              <path d="M0 104 C40 80 70 52 110 52 S170 46 210 48 S270 60 300 56 S360 40 400 42 S470 44 520 38" fill="none" stroke="var(--accent)" stroke-width="3" stroke-linecap="round"/>
+              <g fill="var(--bad)"><circle cx="160" cy="14" r="4"/><circle cx="286" cy="14" r="4"/><circle cx="440" cy="14" r="4"/></g>
+            </svg>
+          </div>
+        </div>
+        <div class="zl-tile">
+          <h3>A heatmap of your keyboard.</h3>
+          <p>Each key is shaded by how often you hit it right.</p>
+          <div class="zl-tile-visual ks-mini-keys" aria-hidden="true">
+            <span>q</span><span>w</span><span>e</span><span class="h2">r</span><span>t</span><span>y</span><span class="h1">u</span>
+            <span>a</span><span>s</span><span class="h1">d</span><span>f</span><span>g</span><span class="h3">h</span><span>j</span>
+            <span>z</span><span>x</span><span>c</span><span>v</span><span class="h3">b</span><span>n</span><span class="h2">m</span>
+          </div>
+        </div>
+        <div class="zl-tile">
+          <h3>Drills that target you.</h3>
+          <p>Practise words heavy in your weakest letters.</p>
+          <div class="zl-tile-visual ks-mini-drill" aria-hidden="true"><span>b</span><span>h</span><span>m</span><p>bath <em>mouth</em> both humble</p></div>
+        </div>
+        <div class="zl-tile wide">
+          <div class="zl-tile-big">(chars ÷ 5) ÷ min</div>
+          <h3>Honest maths.</h3>
+          <p>Only characters in correctly typed words count, spaces included, divided by five per minute. Mistakes you leave in don't pad the score.</p>
+        </div>
+        <div class="zl-tile half">
+          <h3>Personal bests, kept.</h3>
+          <p>A best for every test length, a history of every run and your average over the last ten.</p>
+          <div class="zl-tile-visual ks-mini-pb" aria-hidden="true">
+            <svg viewBox="0 0 300 70" preserveAspectRatio="none"><path d="M4 60 L40 52 L76 56 L112 44 L148 46 L184 34 L220 38 L256 24 L292 14" fill="none" stroke="var(--accent)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/><circle cx="292" cy="14" r="6" fill="var(--accent)"/></svg>
+            <span class="zl-badge">New personal best · 84 wpm</span>
+          </div>
+        </div>
+        <div class="zl-tile half">
+          <h3>Made for phones too.</h3>
+          <p>A hidden input picks up your on-screen keyboard, autocorrect stays off, and the text resizes to fit.</p>
+          <div class="zl-tile-visual ks-mini-modes" aria-hidden="true"><span>15</span><span class="on">30</span><span>60</span><span>120</span><em>seconds</em></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="zl-section alt" id="faq" data-nav="FAQ">
+    <div class="zl-wrap">
+      <div class="zl-section-head center zl-reveal"><h2>Questions</h2></div>
+      <div class="zl-faq zl-reveal">
+        <details><summary>How is WPM worked out?</summary><div>WPM = (characters in correctly typed words, including the space after each one ÷ 5) ÷ minutes. Five characters count as one word, which is the usual standard. A word with any mistake left in it adds nothing.</div></details>
+        <details><summary>What is raw WPM?</summary><div>Raw counts every key you pressed that produced a character or space, right or wrong, the same way. If raw is far above WPM, you are losing speed to errors rather than to slow fingers.</div></details>
+        <details><summary>What does consistency mean?</summary><div>It compares your raw speed from second to second. 100% means you kept exactly the same pace the whole way; lower numbers mean bursts and pauses.</div></details>
+        <details><summary>Why can't I backspace into the previous word?</summary><div>Once you press space, that word is locked in. This keeps the score honest and matches how most typing tests work. You can still fix anything inside the word you are on.</div></details>
+        <details><summary>Where are my results stored?</summary><div>In your browser's storage on this device only. Nothing is uploaded. You can clear your history at any time from the Progress tab.</div></details>
+      </div>
+    </div>
+  </section>
+</main>
+
+<div data-zl="footer"></div>
+</body>
+</html>
